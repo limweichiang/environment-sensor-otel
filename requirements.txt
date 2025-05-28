@@ -1,8 +1,16 @@
 Deprecated==1.2.18
 importlib_metadata==8.6.1
+intelhex==2.3.0
 opentelemetry-api==1.33.1
 opentelemetry-sdk==1.33.1
 opentelemetry-semantic-conventions==0.54b1
+pyserial==3.5
+sensirion-driver-adapters==2.3.0
+sensirion-driver-support-types==0.2.0
+sensirion-i2c-driver==1.0.0
+sensirion-i2c-scd4x==1.0.0
+sensirion-shdlc-driver==0.1.5
+sensirion-shdlc-sensorbridge==0.2.0
 typing_extensions==4.13.2
 wrapt==1.17.2
 zipp==3.22.0
