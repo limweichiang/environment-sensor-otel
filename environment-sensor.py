@@ -2,23 +2,22 @@
 import argparse
 import time
 import logging
+import sys
 from pythonjsonlogger.json import JsonFormatter
 
 # Import for creating and writing environmental metrics
 from opentelemetry import metrics
+from opentelemetry.sdk.resources import SERVICE_NAME, Resource
 from opentelemetry.sdk.metrics import MeterProvider
-from opentelemetry.sdk.metrics.export import (
-    ConsoleMetricExporter,
-    PeriodicExportingMetricReader,
-    Gauge
-)
+from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
+from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
 
 # Import for Sensirion SCD41 Sensor
 from sensirion_i2c_driver import LinuxI2cTransceiver, I2cConnection, CrcCalculator
 from sensirion_driver_adapters.i2c_adapter.i2c_channel import I2cChannel
 from sensirion_i2c_scd4x.device import Scd4xDevice
 
-# Initialize Logger using JSON
+# Initialize Logger to use JSON
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 logHandler = logging.StreamHandler()
@@ -30,32 +29,69 @@ formatter = JsonFormatter(
 logHandler.setFormatter(formatter)
 logger.addHandler(logHandler)
 
-def main():
+def parse_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument('--i2c-port', default='/dev/i2c-1', help="Set Sensirion SCD41 i2c port. Default=/dev/i2c-1")
-    parser.add_argument('--otlp-receiver-grpc', default='localhost:4317', help="Set OTLP gRPC receiver hostname and port. Default='localhost:4317'")
-    parser.add_argument('--otlp-receiver-http', default='localhost:4318', help="Set OTLP HTTP receiver hostname and port. Default='localhost:4318'")
-    parser.add_argument("--verbose", action="store_false", help="Enable debug/verbose logging. Default=false")
-    args = parser.parse_args()
+    # Note: 
+    parser.add_argument('--otlp-receiver-http', default='http://localhost:4318', help="Set OTLP HTTP receiver, must use 'http://<hostname>:<port>' format. Default='http://localhost:4318'")
+    # Note: For --verbose, action="store_true" behaves in an unintuitive way. The default is "false", and will store "true" if the --verbose flag is used.
+    parser.add_argument("--verbose", action="store_true", help="Enable debug/verbose logging. Default=false")
+    return parser.parse_args()
+
+def main():
+    args = parse_arguments()
 
     # Log at DEBUG level if configured. 
     if args.verbose:
         logger.setLevel(logging.DEBUG)
 
-    
-    '''
-        metric_reader = PeriodicExportingMetricReader(ConsoleMetricExporter())
-        provider = MeterProvider(metric_readers=[metric_reader])
+    # Take either the default or specified OTLP receiver/endpoint
+    if args.otlp_receiver_http:
+        oltp_receiver_http = args.otlp_receiver_http
+        logger.debug("OTLP HTTP endpoint set as " + oltp_receiver_http)
+    else:
+        logger.error("Critical parameter OTLP Reciver HTTP value was not provided.")
+        sys.exit(-1)
 
-        # Sets the global default meter provider
-        metrics.set_meter_provider(provider)
+    # Take either the default or specified I2C port to access the SCD41
+    if args.i2c_port:
+        i2c_port = args.i2c_port
+        logger.debug("I2C device set as " + i2c_port)
+    else:
+        logger.error("Critical parameter I2C Port value was not provided.")
+        sys.exit(-1)
 
-        # Creates a meter from the global meter provider
-        meter = metrics.get_meter("my.meter.name")
+    # Service name is required for most backends
+    resource = Resource.create(attributes={SERVICE_NAME: "environment-sensor"})
 
+    # Initialize Metric reader to send to OTLP receiver/endpoint
+    metric_reader = PeriodicExportingMetricReader(OTLPMetricExporter(endpoint=oltp_receiver_http + "/v1/metrics"))
+    metric_provider = MeterProvider(resource=resource, metric_readers=[metric_reader])
 
-        env_temp_gauge = meter.create_gauge('environment.temperature', unit='Cel', description='Environmnent/Ambient Temperature in degrees Celsius')
-    '''
+    # Sets the global default meter provider
+    metrics.set_meter_provider(metric_provider)
+
+    # Creates a meter from the global meter provider
+    meter = metrics.get_meter(__name__)
+
+    # Set up the metrics and types for collection.
+    env_co2_concentration_gauge = meter.create_gauge(
+        name='environment.co2_concentration',
+        unit='ppm',
+        description='Environment CO2 gas concentration in ppm'
+    )
+    env_temperature_gauge = meter.create_gauge(
+        name='environment.temperature',
+        unit='Cel',
+        description='Environment/Ambient Temperature in degrees Celsius'
+    )
+    env_relative_humidity_gauge = meter.create_gauge(
+        name='environment.relative_humidity',
+        unit='%',
+        description='Environment/Ambient Relative Humidity in %'
+    )
+
+    # Initialize the CO2 sensor and loop data collection and transmission.
     with LinuxI2cTransceiver(args.i2c_port) as i2c_transceiver:
         channel = I2cChannel(I2cConnection(i2c_transceiver),
                             slave_address=0x62,
@@ -95,15 +131,20 @@ def main():
             #     If ambient pressure compenstation during measurement
             #     is required, you should call the respective functions here.
             #     Check out the header file for the function definition.
-            (co2_concentration, temperature, relative_humidity
-            ) = sensor.read_measurement()
+            (co2_concentration, temperature, relative_humidity) = sensor.read_measurement()
 
-            #     Log results in physical units.
+            # Log results units.
             logger.info({
+                "message": "Result collected.",
                 "co2_concentration": co2_concentration,
                 "temperature": temperature,
                 "relative_humidity": relative_humidity
             })
+
+            # Collect results as OTel metrics.
+            env_co2_concentration_gauge.set(float(str(co2_concentration)))
+            env_temperature_gauge.set(float(str(temperature)))
+            env_relative_humidity_gauge.set(float(str(relative_humidity)))
 
 
 # Kick off main, if this is the entrypoint.
