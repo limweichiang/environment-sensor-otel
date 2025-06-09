@@ -98,3 +98,5 @@ Hitting a high of > 1500ppm of CO2 while sleeping is definitely not ideal, but h
 Here are a list of the main references used in the development of this project:
 - [Sensirion - Execute measurements using internal Linux I²C driver](https://sensirion.github.io/python-i2c-scd4x/execute-measurements.html#execute-measurements-using-internal-linux-i2c-driver)
 - [Sensirion - Sensirion Raspberry Pi I²C SCD4X Driver - Connect the Sensor](https://github.com/Sensirion/raspberry-pi-i2c-scd4x/tree/master?tab=readme-ov-file#connect-the-sensor)
+- [OpenTelemetry - Python Metrics Instrumentation](https://opentelemetry.io/docs/languages/python/instrumentation/#metrics). This is not very comprehensive, as it doesn't cover basic synchronous gauge-type metric instrumentation.
+- [Signoz - Create custom metrics in Python Application using OpenTelemetry - Create a Gauge](https://signoz.io/opentelemetry/python-custom-metrics/#create-a-gauge). Signoz's documentation on how two create and use a Gauge type metric was simple and straight to the point.
