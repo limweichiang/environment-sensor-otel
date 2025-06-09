@@ -15,6 +15,11 @@ This project is developed with the following:
 - Future - The intention is to migrate this to a light-weight (CHEAPER!!!) Raspberry Pi W 2, with the Raspberry Pi 4B unit being reclaimed for other work.
 
 # Setting Up
+## Set Up Sensor to Raspberry PI Connectivity
+
+Not to repeat the work that is already done by the Sensirion team, refer to Sensirion's own repo at [Sensirion Raspberry Pi I²C SCD4X Driver - Connect the Sensor](https://github.com/Sensirion/raspberry-pi-i2c-scd4x/tree/master?tab=readme-ov-file#connect-the-sensor). This includes a wiring diagram.
+
+## Set Up Collection Environment and Script
 
 Configure the Raspberry Pi to enable I2c at the GPIO.
 ```
@@ -42,7 +47,9 @@ Install the required dependencies.
 (.venv) ~/environment-sensor-otel $ pip install -r requirements.txt
 ```
 
-Install the OpenTelemetry Collector. I recommend referring to the [official installation guide](https://opentelemetry.io/docs/collector/installation/#linux). In this project, I'm installing and using the **otelcol-contrib collector** instead, it's a variation that includes extensions that are required to transmit telemetry to Grafana Cloud. This is how it was installed for this project.
+## Set Up Open Telemetry Collector
+
+Install the OpenTelemetry Collector. I recommend referring to the [official installation guide](https://opentelemetry.io/docs/collector/installation/#linux). In this project, the **otelcol-contrib** collector is used instead, it's a variation that includes extensions that are required to transmit telemetry to Grafana Cloud. This is how it was installed for this project.
 ```
 ~ $ wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.127.0/otelcol-contrib_0.127.0_linux_arm64.deb
 ~ $ sudo dpkg -i otelcol-contrib_0.127.0_linux_arm64.deb 
@@ -77,6 +84,7 @@ options:
   --verbose             Enable debug/verbose logging. Default=false
 (.venv) ~/environment-sensor-otel $ python3 environment-sensor.py
 ```
+Feel free to background and detach the running script so it will continue running after the user session is logged out. Or build your own systemd service config to start it automatically at boot.
 
 # Outcome
 
@@ -84,3 +92,9 @@ This is an example Dashboard in Grafana Cloud that displays the data that the se
 ![Screenshot of Grafana Cloud dashboard, visualizing air quality overnight](img/grafana-environment-dashboard.png)
 
 Hitting a high of > 1500ppm of CO2 while sleeping is definitely not ideal, but hey... We have realtime data to make decisions on improving the situation now.
+
+# References
+
+Here are a list of the main references used in the development of this project:
+- [Sensirion - Execute measurements using internal Linux I²C driver](https://sensirion.github.io/python-i2c-scd4x/execute-measurements.html#execute-measurements-using-internal-linux-i2c-driver)
+- [Sensirion - Sensirion Raspberry Pi I²C SCD4X Driver - Connect the Sensor](https://github.com/Sensirion/raspberry-pi-i2c-scd4x/tree/master?tab=readme-ov-file#connect-the-sensor)
