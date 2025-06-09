@@ -77,3 +77,10 @@ options:
   --verbose             Enable debug/verbose logging. Default=false
 (.venv) ~/environment-sensor-otel $ python3 environment-sensor.py
 ```
+
+# Outcome
+
+This is an example Dashboard in Grafana Cloud that displays the data that the sensor submitted overnight.
+![Screenshot of Grafana Cloud dashboard, visualizing air quality overnight](img/grafana-environment-dashboard.png)
+
+Hitting a high of > 1500ppm of CO2 while sleeping is definitely not ideal, but hey... We have realtime data to make decisions on improving the situation now.
