@@ -1,15 +1,22 @@
-# environment-sensor-otel
-Personal Raspberry Pi Environmental Sensor, using OTel Collector.
+# Objective
+
+The primary intention is to monitor for high CO2 concentration in a room, which is suspected to cause poor sleep quality and headaches.
+
+At the same time, this is also intended as a personal development project to learn IoT data collection using the OpenTelemetry Collector and OpenTelemetry SDKs.
+
+Grafana Cloud will be used as the observability platform, as the free tier provides ~2 weeks of data retention and visualization.
 
 # Environment - Development & Operational
 
-This project is developed and will operate using with the following:
+This project is developed with the following:
+- Sensirion SCD41 Industrial CO2, Temperature and Relative Humidity sensor
 - Raspberry Pi 4B 8GB
 - Ubuntu 24.04.2 LTS (aarch64)
+- Future - The intention is to migrate this to a light-weight (CHEAPER!!!) Raspberry Pi W 2, with the Raspberry Pi 4B unit being reclaimed for other work.
 
 # Setting Up
 
-Configure the Raspberry Pi to enable I2c at the GPIO
+Configure the Raspberry Pi to enable I2c at the GPIO.
 ```
 ~ $ sudo apt install raspi-config
 ~ $ sudo raspi-config
@@ -35,9 +42,24 @@ Install the required dependencies.
 (.venv) ~/environment-sensor-otel $ pip install -r requirements.txt
 ```
 
-Install the OpenTelemetry Collector
+Install the OpenTelemetry Collector. I recommend referring to the [official installation guide](https://opentelemetry.io/docs/collector/installation/#linux). In this project, I'm installing and using the **otelcol-contrib collector** instead, it's a variation that includes extensions that are required to transmit telemetry to Grafana Cloud. This is how it was installed for this project.
 ```
-Work in Progress
+~ $ wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.127.0/otelcol-contrib_0.127.0_linux_arm64.deb
+~ $ sudo dpkg -i otelcol-contrib_0.127.0_linux_arm64.deb 
+```
+Feel free to install and configure the OpenTelemetry Collector as you require (different backends, collect other data, etc), though this guide does not go into that. 
+
+The OpenTelemetry Collector needs to be configured to receive metrics over OTLP, and transmit them to the observability cloud. I've attached a [reference configuration example here](system-config/etc/otelcol-contrib/grafanacloud-metricsonly-conf.yaml). Ensure to update the \<YOUR_USERNAME\>, \<YOUR_PASSWORD\>, and \<YOUR_GRAFANA_CLOUD_ENDPOINT\> variables with whatever applies in your environment. Read more from Grafana [here](https://grafana.com/docs/grafana-cloud/send-data/otlp/send-data-otlp/#recommended-opentelemetry-setup-via-grafana-cloud-integrations). Remember to restart otelcol-contrib for the configs to take effect.
+```
+# Copy reference config to otelcol's config directory. CAUTION: This will overwrite whatever configs exist, so backup the destination file first if necessary.
+~/environment-sensor-otel $ sudo cp environment-sensor-otel/system-config/etc/otelcol-contrib/grafanacloud-metricsonly-conf.yaml /etc/otelcol-contrib/config.yaml
+
+# Edit to apply credentials and Grafana cloud endpoint
+~/environment-sensor-otel $ sudo vi /etc/otelcol-contrib/config.yaml
+... Edit file as necessary
+
+# Restart otelcol
+~/environment-sensor-otel$ sudo systemctl restart otelcol-contrib.service
 ```
 
 # Run Sensor Data Collection
