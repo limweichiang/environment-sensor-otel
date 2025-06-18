@@ -14,6 +14,11 @@ This project is developed with the following:
 - Ubuntu 24.04.2 LTS (aarch64)
 - Future - The intention is to migrate this to a light-weight (CHEAPER!!!) Raspberry Pi W 2, with the Raspberry Pi 4B unit being reclaimed for other work.
 
+# Architecture
+
+The solution should look like this, when completed.
+![Architecture](img/architecture.png)
+
 # Setting Up
 ## Set Up Sensor to Raspberry PI Connectivity
 
