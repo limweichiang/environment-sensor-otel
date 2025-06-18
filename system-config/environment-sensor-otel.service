@@ -1,0 +1,20 @@
+[Unit]
+Description=Environment Sensor OTel
+After=network.target
+
+[Service]
+# Specify the user under which the script should run.
+User=USERNAME
+# Absolute path to the directory containing your script and virtual environment.
+WorkingDirectory=/PATH/environment-sensor-otel
+# Command to execute the script using the virtual environment's Python interpreter.
+ExecStart=/PATH/environment-sensor-otel/.venv/bin/python /PATH/environment-sensor-otel/environment-sensor.py
+Restart=always
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+# This target ensures the service starts when the system reaches multi-user mode,
+# which is typically at boot, before any user logs in.
+WantedBy=multi-user.target
+
