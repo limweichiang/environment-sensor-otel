@@ -21,13 +21,6 @@ Not to repeat the work that is already done by the Sensirion team, refer to Sens
 
 ## Set Up Collection Environment and Script
 
-Configure the Raspberry Pi to enable I2c at the GPIO.
-```
-~ $ sudo apt install raspi-config
-~ $ sudo raspi-config
-```
-Select to **3 Interface Options**, then select **I2C**. When the GUI asks **Would you like the ARM I2C interface to be enabled?**, select **<Yes>**. If all goes well, you should see a **The ARM I2C interface is enabled**.
-
 Download the latest code from this repository and cd into the directory.
 ```
 ~ $ git clone https://github.com/limweichiang/environment-sensor-otel.git
