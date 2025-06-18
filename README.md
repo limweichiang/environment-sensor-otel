@@ -8,11 +8,11 @@ Grafana Cloud will be used as the observability platform, as the free tier provi
 
 # Environment - Development & Operational
 
-This project is developed with the following:
+This project runs on/with the following:
 - Sensirion SCD41 Industrial CO2, Temperature and Relative Humidity sensor
-- Raspberry Pi 4B 8GB
+- Raspberry Pi 4B 8GB (development)
+- Raspberry Pi Zero 2 W (operationally deployed)
 - Ubuntu 24.04.2 LTS (aarch64)
-- Future - The intention is to migrate this to a light-weight (CHEAPER!!!) Raspberry Pi W 2, with the Raspberry Pi 4B unit being reclaimed for other work.
 
 # Architecture
 
