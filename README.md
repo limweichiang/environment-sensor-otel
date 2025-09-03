@@ -36,7 +36,7 @@ Download the latest code from this repository and cd into the directory.
 Using a virtual environment is highly recommended. Create one and activate it.
 ```
 ~/environment-sensor-otel $ python3 -m venv .venv
-~/environment-sensor-otel $ source .venv/bin/Activate
+~/environment-sensor-otel $ source .venv/bin/activate
 (.venv) ~/environment-sensor-otel $
 ```
 
@@ -49,8 +49,8 @@ Install the required dependencies.
 
 Install the OpenTelemetry Collector. I recommend referring to the [official installation guide](https://opentelemetry.io/docs/collector/installation/#linux). In this project, the **otelcol-contrib** collector is used instead, it's a variation that includes extensions that are required to transmit telemetry to Grafana Cloud. This is how it was installed for this project.
 ```
-~ $ wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.127.0/otelcol-contrib_0.127.0_linux_arm64.deb
-~ $ sudo dpkg -i otelcol-contrib_0.127.0_linux_arm64.deb 
+~ $ wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.133.0/otelcol-contrib_0.133.0_linux_arm64.deb
+~ $ sudo dpkg -i otelcol-contrib_0.133.0_linux_arm64.deb
 ```
 Feel free to install and configure the OpenTelemetry Collector as you require (different backends, collect other data, etc), though this guide does not go into that. 
 
